@@ -9,8 +9,8 @@ import java.awt.*;
  */
 public class Board {
    // Define named constants
-   public static final int ROWS = 3;  // ROWS x COLS cells
-   public static final int COLS = 3;
+   public static final int ROWS = 6;  // ROWS x COLS cells
+   public static final int COLS = 7;
    // Define named constants for drawing
    public static final int CANVAS_WIDTH = Cell.SIZE * COLS;  // the drawing canvas
    public static final int CANVAS_HEIGHT = Cell.SIZE * ROWS;

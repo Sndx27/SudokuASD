@@ -15,9 +15,9 @@ public class GameBoardPanel extends JPanel {
 
    // Define properties
    /** The game board composes of 9x9 Cells (customized JTextFields) */
-   private Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
+   public Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
    /** It also contains a Puzzle with array numbers and isGiven */
-   private Puzzle puzzle = new Puzzle();
+   public Puzzle puzzle = new Puzzle();
 
    /** Constructor */
    public GameBoardPanel() {

@@ -2,9 +2,13 @@ package sudoku;
 
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.BorderFactory;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+
 
 /**
  * The Cell class models the cells of the Sudoku puzzle, by customizing
@@ -40,24 +44,83 @@ public class Cell extends JTextField {
         this.col = col;
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
-    
-        // Atur Border Kustom
-        boolean topThick = (row % 3 == 0) && (row != 0); // Garis tebal di awal subgrid (selain baris pertama)
-        boolean leftThick = (col % 3 == 0) && (col != 0); // Garis tebal di awal subgrid (selain kolom pertama)
-        boolean bottomThick = (row == SudokuConstants.GRID_SIZE - 1); // Tebal di bagian bawah grid
-        boolean rightThick = (col == SudokuConstants.GRID_SIZE - 1); // Tebal di bagian kanan grid
-    
-        Border cellBorder = BorderFactory.createMatteBorder(
-            topThick ? 3 : 1, // Ketebalan atas
-            leftThick ? 3 : 1, // Ketebalan kiri
-            bottomThick ? 3 : 1, // Ketebalan bawah (pada grid terakhir)
-            rightThick ? 3 : 1, // Ketebalan kanan (pada grid terakhir)
-            GRID_LINE_COLOR // Warna border
-        );
-    
-        super.setBorder(cellBorder);
+        addActionListener(e -> handleInput());
+        
+
+        setKeyBindings();
     }
 
+    private void setKeyBindings() {
+        // Bind number keys to input numbers
+        for (int i = 1; i <= 9; i++) {
+            final int number = i;
+            getInputMap().put(KeyStroke.getKeyStroke(String.valueOf(i)), "input" + i);
+            getActionMap().put("input" + i, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleInput(number);
+                }
+            });
+        }
+
+        // Bind arrow keys for navigation
+        getInputMap().put(KeyStroke.getKeyStroke("UP"), "moveUp");
+        getActionMap().put("moveUp", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row - 1, col);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("DOWN"), "moveDown");
+        getActionMap().put("moveDown", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row + 1, col);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("LEFT"), "moveLeft");
+        getActionMap().put("moveLeft", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row, col - 1);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "moveRight");
+        getActionMap().put("moveRight", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row, col + 1);
+            }
+        });
+    }
+
+    private void moveToCell(int newRow, int newCol) {
+        if (newRow >= 0 && newRow < SudokuConstants.GRID_SIZE && newCol >= 0 && newCol < SudokuConstants.GRID_SIZE) {
+            SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+            mainFrame.board.cells[newRow][newCol].requestFocus(); // Move focus to the new cell
+        }
+    }
+
+    private void handleInput(int inputNumber) {
+        SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+        if (mainFrame.isValidInput(row, col, inputNumber)) {
+            if (inputNumber == number) {
+                status = CellStatus.CORRECT_GUESS;
+            } else {
+                status = CellStatus.WRONG_GUESS;
+            }
+            paint(); // Update the cell's appearance
+            mainFrame.updateStatusBar(); // Update the status bar
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid input!");
+        }
+    }
+    /**
+     * Reset this cell for a new game, given the puzzle number and isGiven
+     */
     public void newGame(int number, boolean isGiven) {
         this.number = number;
         this.status = isGiven ? CellStatus.GIVEN : CellStatus.TO_GUESS;
@@ -84,7 +147,32 @@ public class Cell extends JTextField {
             super.setBackground(BG_WRONG_GUESS);
         }
     }
+    private void handleInput() {
+        try {
+            int inputNumber = Integer.parseInt(getText());
+            SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+            if (mainFrame.isValidInput(row, col, inputNumber)) {
+                if (inputNumber == number) {
+                    status = CellStatus.CORRECT_GUESS;
+                } else {
+                    status = CellStatus.WRONG_GUESS;
+                }
+                paint(); // Update the cell's appearance
+                mainFrame.updateStatusBar(); // Update the status bar
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid input!");
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid number.");
+        }
+    }
 
+
+    /**
+     * Set whether this cell is in conflict
+     * 
+     * @param conflict True to mark this cell as in conflict, false otherwise
+     */
     public void setConflict(boolean conflict) {
         this.isInConflict = conflict;
         paint(); 
@@ -106,42 +194,42 @@ public class Cell extends JTextField {
         Color minorGridColor = new Color(239, 239, 239, 255);
     
         // Gambar grid minor terlebih dahulu
-        g2.setColor(minorGridColor); // Warna abu-abu terang untuk grid minor
-        g2.setStroke(new java.awt.BasicStroke(1)); // Tipis untuk grid minor
-        if (row > 0) { // Hindari menggambar garis atas jika berada di baris pertama
-            g2.drawLine(0, 0, getWidth(), 0); // Garis atas minor
+        g2.setColor(minorGridColor); 
+        g2.setStroke(new java.awt.BasicStroke(1)); 
+        if (row > 0) { 
+            g2.drawLine(0, 0, getWidth(), 0); 
         }
-        if (col > 0) { // Hindari menggambar garis kiri jika berada di kolom pertama
-            g2.drawLine(0, 0, 0, getHeight()); // Garis kiri minor
+        if (col > 0) { 
+            g2.drawLine(0, 0, 0, getHeight()); 
         }
-        if (row < 8) { // Hindari menggambar garis bawah jika berada di baris terakhir
-            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1); // Garis bawah minor
+        if (row < 8) { 
+            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1); 
         }
-        if (col < 8) { // Hindari menggambar garis kanan jika berada di kolom terakhir
-            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight()); // Garis kanan minor
+        if (col < 8) { 
+            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
         }
     
         // Tentukan apakah ini bagian dari subgrid 3x3
-        boolean isTopBorder = (row % 3 == 0); // Garis atas subgrid
-        boolean isLeftBorder = (col % 3 == 0); // Garis kiri subgrid
-        boolean isBottomBorder = (row == 8); // Garis bawah grid keseluruhan
-        boolean isRightBorder = (col == 8); // Garis kanan grid keseluruhan
+        boolean isTopBorder = (row % 3 == 0);
+        boolean isLeftBorder = (col % 3 == 0);
+        boolean isBottomBorder = (row == 8);
+        boolean isRightBorder = (col == 8); 
     
         // Gambar garis pink untuk subgrid 3x3 di atas grid minor
-        g2.setColor(GRID_LINE_COLOR); // Warna pink untuk garis subgrid
-        g2.setStroke(new java.awt.BasicStroke(4)); // Tebal untuk subgrid
+        g2.setColor(GRID_LINE_COLOR); 
+        g2.setStroke(new java.awt.BasicStroke(4)); 
     
-        if (isTopBorder && row > 0) { // Hindari menggambar garis atas jika berada di baris pertama
-            g2.drawLine(0, 0, getWidth(), 0); // Garis atas
+        if (isTopBorder && row > 0) { 
+            g2.drawLine(0, 0, getWidth(), 0); 
         }
-        if (isLeftBorder && col > 0) { // Hindari menggambar garis kiri jika berada di kolom pertama
-            g2.drawLine(0, 0, 0, getHeight()); // Garis kiri
+        if (isLeftBorder && col > 0) { 
+            g2.drawLine(0, 0, 0, getHeight());
         }
-        if (isBottomBorder && row < 8) { // Hindari menggambar garis bawah jika berada di baris terakhir
-            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1); // Garis bawah
+        if (isBottomBorder && row < 8) {
+            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
         }
-        if (isRightBorder && col < 8) { // Hindari menggambar garis kanan jika berada di kolom terakhir
-            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight()); // Garis kanan
+        if (isRightBorder && col < 8) { 
+            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
         }
     }
     

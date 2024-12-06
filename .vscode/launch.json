@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "sudoku.Main",
+            "projectName": "SudokuASD-4_b6ee936a"
+        },
+        {
+            "type": "java",
             "name": "Run ConnectFour",
             "request": "launch",
             "mainClass": "connectfour.Main",

@@ -2,9 +2,13 @@ package sudoku;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+
 
 /**
  * The Cell class models the cells of the Sudoku puzzle, by customizing
@@ -38,8 +42,78 @@ public class Cell extends JTextField {
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
         addActionListener(e -> handleInput());
+        
+        setKeyBindings();
     }
 
+    private void setKeyBindings() {
+        // Bind number keys to input numbers
+        for (int i = 1; i <= 9; i++) {
+            final int number = i;
+            getInputMap().put(KeyStroke.getKeyStroke(String.valueOf(i)), "input" + i);
+            getActionMap().put("input" + i, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleInput(number);
+                }
+            });
+        }
+
+        // Bind arrow keys for navigation
+        getInputMap().put(KeyStroke.getKeyStroke("UP"), "moveUp");
+        getActionMap().put("moveUp", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row - 1, col);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("DOWN"), "moveDown");
+        getActionMap().put("moveDown", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row + 1, col);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("LEFT"), "moveLeft");
+        getActionMap().put("moveLeft", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row, col - 1);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "moveRight");
+        getActionMap().put("moveRight", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row, col + 1);
+            }
+        });
+    }
+
+    private void moveToCell(int newRow, int newCol) {
+        if (newRow >= 0 && newRow < SudokuConstants.GRID_SIZE && newCol >= 0 && newCol < SudokuConstants.GRID_SIZE) {
+            SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+            mainFrame.board.cells[newRow][newCol].requestFocus(); // Move focus to the new cell
+        }
+    }
+
+    private void handleInput(int inputNumber) {
+        SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+        if (mainFrame.isValidInput(row, col, inputNumber)) {
+            if (inputNumber == number) {
+                status = CellStatus.CORRECT_GUESS;
+            } else {
+                status = CellStatus.WRONG_GUESS;
+            }
+            paint(); // Update the cell's appearance
+            mainFrame.updateStatusBar(); // Update the status bar
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid input!");
+        }
+    }
     /**
      * Reset this cell for a new game, given the puzzle number and isGiven
      */

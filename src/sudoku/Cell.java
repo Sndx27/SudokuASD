@@ -23,22 +23,16 @@ public class Cell extends JTextField {
     public static final Font FONT_NUMBERS = new Font("OCR A Extended", Font.PLAIN, 28);
 
     // Define properties (package-visible)
-    /** The row and column number [0-8] of this cell */
-    int row, col;
-    /** The puzzle number [1-9] for this cell */
-    int number;
-    /** The status of this cell defined in enum CellStatus */
-    CellStatus status;
-
-    /** Whether this cell is in conflict */
-    private boolean isInConflict = false;
+    int row, col; // The row and column number [0-8] of this cell
+    int number; // The puzzle number [1-9] for this cell
+    CellStatus status; // The status of this cell defined in enum CellStatus
+    private boolean isInConflict = false; // Whether this cell is in conflict
 
     /** Constructor */
     public Cell(int row, int col) {
         super(); // JTextField
         this.row = row;
         this.col = col;
-        // Inherited from JTextField: Beautify all the cells once for all
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
     }
@@ -58,8 +52,7 @@ public class Cell extends JTextField {
      */
     public void paint() {
         if (isInConflict) {
-            // Highlight cell in red if it is in conflict
-            super.setBackground(BG_CONFLICT);
+            super.setBackground(BG_CONFLICT); // Highlight cell in red
         } else if (status == CellStatus.GIVEN) {
             super.setText(number + "");
             super.setEditable(false);
@@ -85,6 +78,14 @@ public class Cell extends JTextField {
     public void setConflict(boolean conflict) {
         this.isInConflict = conflict;
         paint(); // Repaint the cell to reflect the conflict status
+
+        if (conflict) {
+            // Timer untuk mengatur ulang warna setelah 5 detik
+            new javax.swing.Timer(2000, e -> {
+                this.isInConflict = false; // Reset status konflik
+                paint(); // Kembalikan warna ke normal
+            }).start();
+        }
     }
 
     /**

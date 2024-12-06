@@ -1,32 +1,19 @@
 {
     "version": "0.2.0",
     "configurations": [
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "sudoku.Main",
-            "projectName": "SudokuASD-7_b6ee936d"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "sudoku.Main",
-            "projectName": "SudokuASD-4_b6ee936a"
-        },
-        {
-            "type": "java",
-            "name": "Run ConnectFour",
-            "request": "launch",
-            "mainClass": "connectfour.Main",
-            "projectName": "src"
-        },
+        // {
+        //     "type": "java",
+        //     "name": "Run ConnectFour",
+        //     "request": "launch",
+        //     "mainClass": "connectfour.Main",
+        //     "projectName": "src"
+        // },
         {
             "type": "java",
             "name": "Run Sudoku",
             "request": "launch",
-            "mainClass": "sudoku.SudokuMain"
+            "mainClass": "sudoku.WelcomeScreen;",
+            "projectName": "src"
         }
     ]
 }

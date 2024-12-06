@@ -12,36 +12,46 @@ public class SudokuMain extends JFrame {
    private static final long serialVersionUID = 1L;  // to prevent serial warning
 
    // private variables
-    GameBoardPanel board = new GameBoardPanel();
-    JButton btnNewGame = new JButton("New Game");
-    JTextField statusBar = new JTextField("Welcome to Sudoku! by Kelompok 7");
-    JProgressBar progressBar = new JProgressBar(0, SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE);
-    Timer timer;
-    int elapsedTime = 0; // in seconds
-    int score = 0;
+        GameBoardPanel board = new GameBoardPanel();
+        JButton btnNewGame = new JButton("New Game");
+        JTextField statusBar = new JTextField("Welcome to Sudoku! by Kelompok 7");
+        JProgressBar progressBar = new JProgressBar(0, SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE);
+        Timer timer;
+        int elapsedTime = 0; // in seconds
+        int score = 0;
 
 
    // Constructor
    public SudokuMain(String playerName) {
-      Container cp = getContentPane();
-      cp.setLayout(new BorderLayout());
 
-      cp.add(board, BorderLayout.CENTER);
+        Container cp = getContentPane();
+        cp.setLayout(new BorderLayout());
+
+        cp.add(board, BorderLayout.CENTER);
+
+        // Set icon for taskbar
+        try {
+            // Pastikan path gambar sesuai dengan lokasi file Anda
+            ImageIcon icon = new ImageIcon("src/iamges/astolfoKAWAI.jpg");  // Ganti dengan path gambar Anda
+            setIconImage(icon.getImage()); // Set ikon untuk aplikasi di taskbar
+        } catch (Exception e) {
+            System.out.println("Icon not found: " + e.getMessage());
+        }
 
       // Add a button to the south to re-start the game via board.newGame()
-      btnNewGame.addActionListener(new ActionListener() {
-         public void actionPerformed(ActionEvent e) {
+        btnNewGame.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
             board.newGame();
-            resetGame();
+            resetGame();    
             updateStatusBar();
-         }
+         }  
       }); 
 
 
-      JPanel southPanel = new JPanel(new BorderLayout());
-      southPanel.add(btnNewGame, BorderLayout.NORTH); // button at the top
-      southPanel.add(statusBar, BorderLayout.SOUTH);  // status bar 
-      cp.add(southPanel, BorderLayout.SOUTH);  // Add the south panel to the main container
+        JPanel southPanel = new JPanel(new BorderLayout());
+        southPanel.add(btnNewGame, BorderLayout.NORTH); // button at the top
+        southPanel.add(statusBar, BorderLayout.SOUTH);  // status bar 
+        cp.add(southPanel, BorderLayout.SOUTH);  // Add the south panel to the main container
 
       // Initialize the game board to start the game
       board.newGame();
@@ -55,15 +65,36 @@ public class SudokuMain extends JFrame {
             elapsedTime++;
             updateStatusBar();
         }
-      });
+        });
         timer.start();
 
 
-      pack();     // Pack the UI components, instead of using setSize()
-      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
-      setTitle(playerName+"'s Sudoku");
-      setVisible(true);
+        pack();     // Pack the UI components, instead of using setSize()
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
+        setTitle(playerName+"'s Sudoku");
+        setVisible(true);
    }
+    public class ImagePanel extends JPanel {
+        private Image backgroundImage;
+
+        // Constructor untuk memuat gambar
+        public ImagePanel(String imagePath) {
+            try {
+                backgroundImage = new ImageIcon(imagePath).getImage();
+            } catch (Exception e) {
+                System.out.println("Background image not found: " + e.getMessage());
+            }
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (backgroundImage != null) {
+                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+            }
+        }
+    }
+
 
    // Method to create the menu bar
    private JMenuBar createMenuBar() {

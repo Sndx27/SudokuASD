@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 public class WelcomeScreen extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -16,7 +19,7 @@ public class WelcomeScreen extends JFrame {
     private int difficulty = 0;
 
     public WelcomeScreen() {
-        
+        MusicPlayer.playMusic("src\\audio\\The Notebooks - Stray Game OST (Original Soundtrack) (1).wav");
         // Set up the welcome screen JFrame
         setTitle("Welcome to Sudoku");
         setSize(800, 500); // Size of the window
@@ -50,13 +53,14 @@ public class WelcomeScreen extends JFrame {
         spacerPanel.setOpaque(false); // Transparent spacer
         panel.add(spacerPanel, BorderLayout.CENTER);
 
+        
         // Create a panel for the name input and label, positioned below the "SudoPaw" title
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // Center the input panel
+        inputPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Center the input panel
         inputPanel.setOpaque(false); // Make the input panel transparent so the background shows
 
         // Add a fixed space between the title and the input field (around 1/4 from bottom + 50px)
-        inputPanel.add(Box.createVerticalStrut(450)); // Adjust the space (290px for better positioning)
+        inputPanel.add(Box.createVerticalStrut(455)); // Adjust the space (290px for better positioning)
 
         // Label for "Enter your name:"
         JLabel nameLabel = new JLabel("Enter your name: ");
@@ -64,14 +68,26 @@ public class WelcomeScreen extends JFrame {
         nameLabel.setForeground(Color.WHITE); // White text to be visible over the background
         inputPanel.add(nameLabel);
 
-        // Create the text field for name input with borderless style
-        nameField = new JTextField();
-        nameField.setPreferredSize(new Dimension(250, 30)); // Adjust size of the input field
-        nameField.setBackground(new Color(255, 255, 255, 150)); // Semi-transparent white background for input field
-        nameField.setForeground(Color.BLACK); // Text color black
-        nameField.setBorder(null); // Remove the border
-        nameField.setOpaque(false); // Ensure the background is fully transparent
-        inputPanel.add(nameField); // Add name field to the panel
+        // Add horizontal strut to create space on the left
+        inputPanel.add(Box.createHorizontalStrut(165)); // Adjust this value to move the field left or right
+
+        // Create the text pane for name input with borderless style
+        JTextPane nameField = new JTextPane();
+        nameField.setPreferredSize(new Dimension (133, 15)); // Ukuran input field yang lebih pendek
+        nameField.setBackground(new Color(0, 0, 0, 30)); // Latar belakang semi-transparan
+        nameField.setForeground(Color.BLACK); // Warna teks hitam
+        nameField.setBorder(null); // Hapus border
+        nameField.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT); // Set orientation
+        nameField.setCaretPosition(0); // Set caret position to the start
+
+        // Center the text in the JTextPane
+        StyledDocument doc = nameField.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
+
+        inputPanel.add(nameField); // Tambahkan field nama ke panel
+
 
         // Add the input panel to the main panel
         panel.add(inputPanel, BorderLayout.CENTER);
@@ -90,6 +106,20 @@ public class WelcomeScreen extends JFrame {
         levelPanel.add(mediumButton);
         levelPanel.add(hardButton);
         bottomPanel.add(levelPanel, BorderLayout.NORTH);
+
+        // Update the action listeners for the difficulty buttons
+        easyButton.addActionListener((ActionEvent e) -> {
+            updateDifficultyButtonStyles(easyButton); // Update styles for easy button
+            difficulty = 1;
+        });
+        mediumButton.addActionListener((ActionEvent e) -> {
+            updateDifficultyButtonStyles(mediumButton); // Update styles for medium button
+            difficulty = 2;
+        });
+        hardButton.addActionListener((ActionEvent e) -> {
+            updateDifficultyButtonStyles(hardButton); // Update styles for hard button
+            difficulty = 3;
+        });
 
         // Create and style the start button
         JPanel startPanel = new JPanel();
@@ -151,7 +181,37 @@ public class WelcomeScreen extends JFrame {
         // Make the welcome screen visible
         setVisible(true);
     }
+    class ShadowTextField extends JTextField {
+        private Color shadowColor = new Color(0, 0, 0, 30); // Warna bayangan dengan transparansi
+    
+        public ShadowTextField() {
+            super();
+            setOpaque(false); // Pastikan latar belakang transparan
+        }
+    
+        @Override
+        protected void paintComponent(Graphics g) {
+            // Gambar bayangan
+            g.setColor(shadowColor);
+            g.fillRoundRect(1, 5, getWidth() - 10, getHeight() - 10, 10, 10); // Gambar bayangan dengan sudut melengkung
+    
+            // Gambar teks field
+            super.paintComponent(g);
+        }
+    }
+    // Method to update button styles
+    private void updateDifficultyButtonStyles(JButton selectedButton) {
+        // Reset all buttons to default style
+        easyButton.setBackground(null);
+        mediumButton.setBackground(null);
+        hardButton.setBackground(null);
+        
+        // Set the selected button to a darker color
+        selectedButton.setBackground(Color.GRAY); // Change to a darker color
+    }
 
+    
+    
     // Helper method to load the image
     private BufferedImage loadImage(String path) {
         try {

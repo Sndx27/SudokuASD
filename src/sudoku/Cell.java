@@ -19,14 +19,17 @@ public class Cell extends JTextField {
     private static final long serialVersionUID = 1L; // to prevent serial warning
 
     // Define named constants for JTextField's colors and fonts
-    public static final Color BG_GIVEN = new Color(240, 240, 240); // RGB
-    public static final Color FG_GIVEN = Color.BLACK;
-    public static final Color FG_NOT_GIVEN = Color.GRAY;
-    public static final Color BG_TO_GUESS = Color.YELLOW;
-    public static final Color BG_CORRECT_GUESS = new Color(0, 216, 0);
-    public static final Color BG_WRONG_GUESS = new Color(216, 0, 0);
-    public static final Color BG_CONFLICT = Color.RED; // Highlight for conflicts
-    public static final Font FONT_NUMBERS = new Font("OCR A Extended", Font.PLAIN, 28);
+    public static final Color FG_GIVEN = new Color(0, 0, 0); // Warna angka yang sudah diberikan (Hitam)
+    public static final Color FG_NOT_GIVEN = new Color(0, 0, 0); // Warna angka yang belum diberikan (Hitam)
+    public static final Color BG_GIVEN = Color.WHITE; // Latar belakang angka yang diberikan (Abu-abu terang)
+    public static final Color BG_TO_GUESS = Color.WHITE; // Latar belakang untuk angka yang bisa diubah (Putih)
+    public static final Color BG_CORRECT_GUESS = new Color(144, 238, 144); // Latar belakang hijau untuk angka benar
+    public static final Color BG_WRONG_GUESS = new Color(255, 182, 193); // Latar belakang merah muda untuk angka salah
+    public static final Color BG_CONFLICT = new Color(255, 99, 71); // Highlight merah untuk konflik
+    public static final Font FONT_NUMBERS = new Font("SansSerif", Font.BOLD, 24); // Font angka
+    public static final Color GRID_LINE_COLOR = new Color(181, 85, 96); // Warna pink kemerahan untuk garis grid
+    public static final Color GRID_LINE_COLOR_NON3X3 = new Color(239,239,239,255); // Warna pink kemerahan untuk garis grid
+    public static final Color NUMBER_COLOR = Color.BLACK; // Warna angka (Hitam)
 
     // Define properties (package-visible)
     int row, col; // The row and column number [0-8] of this cell
@@ -43,6 +46,7 @@ public class Cell extends JTextField {
         super.setFont(FONT_NUMBERS);
         addActionListener(e -> handleInput());
         
+
         setKeyBindings();
     }
 
@@ -124,9 +128,6 @@ public class Cell extends JTextField {
         paint(); // Paint the cell based on its initial status
     }
 
-    /**
-     * This Cell (JTextField) paints itself based on its status and conflict
-     */
     public void paint() {
         if (isInConflict) {
             super.setBackground(BG_CONFLICT); // Highlight cell in red
@@ -174,22 +175,67 @@ public class Cell extends JTextField {
      */
     public void setConflict(boolean conflict) {
         this.isInConflict = conflict;
-        paint(); // Repaint the cell to reflect the conflict status
+        paint(); 
 
         if (conflict) {
-            // Timer untuk mengatur ulang warna setelah 5 detik
+       
             new javax.swing.Timer(2000, e -> {
-                this.isInConflict = false; // Reset status konflik
-                paint(); // Kembalikan warna ke normal
+                this.isInConflict = false; 
+                paint(); 
             }).start();
         }
     }
 
-    /**
-     * Get whether this cell is in conflict
-     * 
-     * @return True if the cell is in conflict, false otherwise
-     */
+    @Override
+    protected void paintBorder(java.awt.Graphics g) {
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
+    
+        // Warna untuk grid minor (bukan subgrid 3x3)
+        Color minorGridColor = new Color(239, 239, 239, 255);
+    
+        // Gambar grid minor terlebih dahulu
+        g2.setColor(minorGridColor); 
+        g2.setStroke(new java.awt.BasicStroke(1)); 
+        if (row > 0) { 
+            g2.drawLine(0, 0, getWidth(), 0); 
+        }
+        if (col > 0) { 
+            g2.drawLine(0, 0, 0, getHeight()); 
+        }
+        if (row < 8) { 
+            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1); 
+        }
+        if (col < 8) { 
+            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
+        }
+    
+        // Tentukan apakah ini bagian dari subgrid 3x3
+        boolean isTopBorder = (row % 3 == 0);
+        boolean isLeftBorder = (col % 3 == 0);
+        boolean isBottomBorder = (row == 8);
+        boolean isRightBorder = (col == 8); 
+    
+        // Gambar garis pink untuk subgrid 3x3 di atas grid minor
+        g2.setColor(GRID_LINE_COLOR); 
+        g2.setStroke(new java.awt.BasicStroke(4)); 
+    
+        if (isTopBorder && row > 0) { 
+            g2.drawLine(0, 0, getWidth(), 0); 
+        }
+        if (isLeftBorder && col > 0) { 
+            g2.drawLine(0, 0, 0, getHeight());
+        }
+        if (isBottomBorder && row < 8) {
+            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
+        }
+        if (isRightBorder && col < 8) { 
+            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
+        }
+    }
+    
+    
+    
+       
     public boolean isConflict() {
         return isInConflict;
     }

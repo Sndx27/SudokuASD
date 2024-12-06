@@ -12,9 +12,14 @@ public class SudokuMain extends JFrame {
    private static final long serialVersionUID = 1L;  // to prevent serial warning
 
    // private variables
-   GameBoardPanel board = new GameBoardPanel();
-   JButton btnNewGame = new JButton("New Game");
-   JTextField statusBar = new JTextField("Welcome to Sudoku! by Kelompok 7");
+    GameBoardPanel board = new GameBoardPanel();
+    JButton btnNewGame = new JButton("New Game");
+    JTextField statusBar = new JTextField("Welcome to Sudoku! by Kelompok 7");
+    JProgressBar progressBar = new JProgressBar(0, SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE);
+    Timer timer;
+    int elapsedTime = 0; // in seconds
+    int score = 0;
+
 
    // Constructor
    public SudokuMain(String playerName) {
@@ -27,9 +32,11 @@ public class SudokuMain extends JFrame {
       btnNewGame.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
             board.newGame();
+            resetGame();
             updateStatusBar();
          }
-      });   
+      }); 
+
 
       JPanel southPanel = new JPanel(new BorderLayout());
       southPanel.add(btnNewGame, BorderLayout.NORTH); // button at the top
@@ -40,6 +47,17 @@ public class SudokuMain extends JFrame {
       board.newGame();
       setJMenuBar(createMenuBar());
       updateStatusBar();
+
+      progressBar.setStringPainted(true);
+      cp.add(progressBar, BorderLayout.NORTH);
+      timer = new Timer(1000, new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            elapsedTime++;
+            updateStatusBar();
+        }
+      });
+        timer.start();
+
 
       pack();     // Pack the UI components, instead of using setSize()
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
@@ -60,6 +78,7 @@ public class SudokuMain extends JFrame {
       // Add action listeners for File menu items
       newGameItem.addActionListener(e -> {
          board.newGame();
+         resetGame();
          updateStatusBar(); // Update the status bar
       });
       resetGameItem.addActionListener(e -> {
@@ -94,16 +113,21 @@ public class SudokuMain extends JFrame {
    }
 
    // Method to reset the game (clears the board but keeps the puzzle)
-   private void resetGame() {
-      for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-          for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-              Cell cell = board.cells[row][col];
-              if (cell.status == CellStatus.TO_GUESS || cell.status == CellStatus.WRONG_GUESS) {
-                  cell.newGame(0, false); // Reset the cell
-              }
-          }
-      }
-  }
+    private void resetGame() {
+        elapsedTime = 0; // Reset elapsed time
+        score = 0; // Reset score
+        timer.restart(); // Restart the timer
+        progressBar.setValue(0); // Reset progress bar
+
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+                Cell cell = board.cells[row][col];
+                if (cell.status == CellStatus.TO_GUESS || cell.status == CellStatus.WRONG_GUESS) {
+                    cell.newGame(0, false); // Reset the cell
+                }
+            }
+        }
+    }
 
    // Method to update the status bar with the number of cells remaining
    public void updateStatusBar() {
@@ -116,7 +140,9 @@ public class SudokuMain extends JFrame {
               }
           }
       }
-      statusBar.setText("Cells remaining: " + remainingCells);
+      statusBar.setText("Cells remaining: " + remainingCells + " | Score: " + score + " | Time: " + elapsedTime + "s");
+      progressBar.setValue(SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE - remainingCells);
+
   }
   public boolean isValidInput(int row, int col, int inputNumber) {
    // Check if the input number is between 1 and 9
@@ -149,6 +175,8 @@ public class SudokuMain extends JFrame {
        }
    }
 
+   // If the input is valid, increase the score
+   score += 10; // Increment score for a valid input
    return true; // No conflicts found
 }
 

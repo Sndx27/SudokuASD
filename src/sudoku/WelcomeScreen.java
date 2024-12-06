@@ -13,7 +13,7 @@ public class WelcomeScreen extends JFrame {
     private JButton easyButton;
     private JButton mediumButton;
     private JButton hardButton;
-    private int difficulty;
+    private int difficulty = 0;
 
     public WelcomeScreen() {
         //int difficulty;
@@ -89,18 +89,28 @@ public class WelcomeScreen extends JFrame {
         startButton.addActionListener((ActionEvent e) -> {
             
             String playerName = nameField.getText().trim();
-            if (!playerName.isEmpty()) {
+            if (!playerName.isEmpty() && difficulty!=0) {
                 // Dispose the welcome screen and start the main game window
                 dispose();
                 new SudokuMain(playerName,difficulty); // Pass the player's name to the main game window
                 
             } else {
-                JOptionPane.showMessageDialog(
+                if(playerName.isEmpty()){
+                    JOptionPane.showMessageDialog(
                     this,
                     "Please enter your name.",
                     "Input Required",
                     JOptionPane.WARNING_MESSAGE
                 );
+                }else if(difficulty==0){
+                    JOptionPane.showMessageDialog(
+                    this,
+                    "Please select level.",
+                    "Input Required",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                }
+                
             }
         });
         

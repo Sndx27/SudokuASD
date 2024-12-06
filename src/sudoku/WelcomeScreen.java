@@ -1,6 +1,7 @@
 package sudoku;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 
@@ -9,11 +10,13 @@ public class WelcomeScreen extends JFrame {
 
     private JTextField nameField;
     private JButton startButton;
+    private JButton easyButton;
+    private JButton mediumButton;
+    private JButton hardButton;
+    private int difficulty = 0;
 
     public WelcomeScreen() {
-        // Start playing music once when the welcome screen is shown
-        MusicPlayer.playMusic("src\\audio\\The Notebooks - Stray Game OST (Original Soundtrack) (1).wav"); // Replace with your music file path
-
+        
         // Set up the welcome screen JFrame
         setTitle("Welcome to Sudoku");
         setSize(800, 500); // Size of the window
@@ -73,33 +76,77 @@ public class WelcomeScreen extends JFrame {
         // Add the input panel to the main panel
         panel.add(inputPanel, BorderLayout.CENTER);
 
+        JPanel bottomPanel = new JPanel(new FlowLayout());
+
+        // Create difficulty button
+        JPanel levelPanel = new JPanel(new FlowLayout());
+        easyButton = new JButton("Easy");
+        easyButton.setFont(new Font("Arial", Font.BOLD, 12));
+        mediumButton = new JButton("Mid");
+        mediumButton.setFont(new Font("Arial", Font.BOLD, 12));
+        hardButton = new JButton("Hard");
+        hardButton.setFont(new Font("Arial", Font.BOLD, 12));
+        levelPanel.add(easyButton);
+        levelPanel.add(mediumButton);
+        levelPanel.add(hardButton);
+        bottomPanel.add(levelPanel, BorderLayout.NORTH);
+
         // Create and style the start button
+        JPanel startPanel = new JPanel();
         startButton = new JButton("Start Game");
         startButton.setFont(new Font("Arial", Font.BOLD, 18));
         startButton.setFocusPainted(false);
         startButton.setBackground(Color.GREEN);
         startButton.setForeground(Color.WHITE);
-        panel.add(startButton, BorderLayout.SOUTH);
+        bottomPanel.add(startButton, BorderLayout.SOUTH);
+
+        panel.add(bottomPanel, BorderLayout.SOUTH);
 
         // Add the panel to the frame
         add(panel);
+        JLabel easy = new JLabel("Easy");
+        JLabel medium = new JLabel("Medium");
+        JLabel hard = new JLabel("Hard");
+        easyButton.addActionListener((ActionEvent e) -> {
+            bottomPanel.add(easy);
+            difficulty = 1;
+        });
+        mediumButton.addActionListener((ActionEvent e) -> {
+            bottomPanel.add(medium);
+            difficulty = 2;
+        });
+        hardButton.addActionListener((ActionEvent e) -> {
+            bottomPanel.add(hard);
+            difficulty = 3;
+        });
 
         // Button click action to start the game
         startButton.addActionListener(e -> {
             String playerName = nameField.getText().trim();
-            if (!playerName.isEmpty()) {
+            if (!playerName.isEmpty() && difficulty!=0) {
                 // Dispose the welcome screen and start the main game window
                 dispose();
-                new SudokuMain(playerName); // Pass the player's name to the main game window
+                new SudokuMain(playerName,difficulty); // Pass the player's name to the main game window
             } else {
-                JOptionPane.showMessageDialog(
+                if(playerName.isEmpty()){
+                    JOptionPane.showMessageDialog(
                     this,
                     "Please enter your name.",
                     "Input Required",
                     JOptionPane.WARNING_MESSAGE
                 );
+                }else if(difficulty==0){
+                    JOptionPane.showMessageDialog(
+                    this,
+                    "Please select level.",
+                    "Input Required",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                }
+                
             }
         });
+        
 
         // Make the welcome screen visible
         setVisible(true);

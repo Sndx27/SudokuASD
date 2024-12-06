@@ -2,7 +2,13 @@ package sudoku;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+
 
 /**
  * The Cell class models the cells of the Sudoku puzzle, by customizing
@@ -13,36 +19,105 @@ public class Cell extends JTextField {
     private static final long serialVersionUID = 1L; // to prevent serial warning
 
     // Define named constants for JTextField's colors and fonts
-    public static final Color BG_GIVEN = new Color(240, 240, 240); // RGB
-    public static final Color FG_GIVEN = Color.BLACK;
-    public static final Color FG_NOT_GIVEN = Color.GRAY;
-    public static final Color BG_TO_GUESS = Color.YELLOW;
-    public static final Color BG_CORRECT_GUESS = new Color(0, 216, 0);
-    public static final Color BG_WRONG_GUESS = new Color(216, 0, 0);
-    public static final Color BG_CONFLICT = Color.RED; // Highlight for conflicts
-    public static final Font FONT_NUMBERS = new Font("OCR A Extended", Font.PLAIN, 28);
+    public static final Color FG_GIVEN = new Color(0, 0, 0); // Warna angka yang sudah diberikan (Hitam)
+    public static final Color FG_NOT_GIVEN = new Color(0, 0, 0); // Warna angka yang belum diberikan (Hitam)
+    public static final Color BG_GIVEN = Color.WHITE; // Latar belakang angka yang diberikan (Abu-abu terang)
+    public static final Color BG_TO_GUESS = Color.WHITE; // Latar belakang untuk angka yang bisa diubah (Putih)
+    public static final Color BG_CORRECT_GUESS = new Color(144, 238, 144); // Latar belakang hijau untuk angka benar
+    public static final Color BG_WRONG_GUESS = new Color(255, 182, 193); // Latar belakang merah muda untuk angka salah
+    public static final Color BG_CONFLICT = new Color(255, 99, 71); // Highlight merah untuk konflik
+    public static final Font FONT_NUMBERS = new Font("SansSerif", Font.BOLD, 24); // Font angka
+    public static final Color GRID_LINE_COLOR = new Color(181, 85, 96); // Warna pink kemerahan untuk garis grid
+    public static final Color GRID_LINE_COLOR_NON3X3 = new Color(239,239,239,255); // Warna pink kemerahan untuk garis grid
+    public static final Color NUMBER_COLOR = Color.BLACK; // Warna angka (Hitam)
 
     // Define properties (package-visible)
-    /** The row and column number [0-8] of this cell */
-    int row, col;
-    /** The puzzle number [1-9] for this cell */
-    int number;
-    /** The status of this cell defined in enum CellStatus */
-    CellStatus status;
-
-    /** Whether this cell is in conflict */
-    private boolean isInConflict = false;
+    int row, col; // The row and column number [0-8] of this cell
+    int number; // The puzzle number [1-9] for this cell
+    CellStatus status; // The status of this cell defined in enum CellStatus
+    private boolean isInConflict = false; // Whether this cell is in conflict
 
     /** Constructor */
     public Cell(int row, int col) {
         super(); // JTextField
         this.row = row;
         this.col = col;
-        // Inherited from JTextField: Beautify all the cells once for all
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
+        addActionListener(e -> handleInput());
+        
+
+        setKeyBindings();
     }
 
+    private void setKeyBindings() {
+        // Bind number keys to input numbers
+        for (int i = 1; i <= 9; i++) {
+            final int number = i;
+            getInputMap().put(KeyStroke.getKeyStroke(String.valueOf(i)), "input" + i);
+            getActionMap().put("input" + i, new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleInput(number);
+                }
+            });
+        }
+
+        // Bind arrow keys for navigation
+        getInputMap().put(KeyStroke.getKeyStroke("UP"), "moveUp");
+        getActionMap().put("moveUp", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row - 1, col);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("DOWN"), "moveDown");
+        getActionMap().put("moveDown", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row + 1, col);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("LEFT"), "moveLeft");
+        getActionMap().put("moveLeft", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row, col - 1);
+            }
+        });
+
+        getInputMap().put(KeyStroke.getKeyStroke("RIGHT"), "moveRight");
+        getActionMap().put("moveRight", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                moveToCell(row, col + 1);
+            }
+        });
+    }
+
+    private void moveToCell(int newRow, int newCol) {
+        if (newRow >= 0 && newRow < SudokuConstants.GRID_SIZE && newCol >= 0 && newCol < SudokuConstants.GRID_SIZE) {
+            SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+            mainFrame.board.cells[newRow][newCol].requestFocus(); // Move focus to the new cell
+        }
+    }
+
+    private void handleInput(int inputNumber) {
+        SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+        if (mainFrame.isValidInput(row, col, inputNumber)) {
+            if (inputNumber == number) {
+                status = CellStatus.CORRECT_GUESS;
+            } else {
+                status = CellStatus.WRONG_GUESS;
+            }
+            paint(); // Update the cell's appearance
+            mainFrame.updateStatusBar(); // Update the status bar
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid input!");
+        }
+    }
     /**
      * Reset this cell for a new game, given the puzzle number and isGiven
      */
@@ -53,13 +128,9 @@ public class Cell extends JTextField {
         paint(); // Paint the cell based on its initial status
     }
 
-    /**
-     * This Cell (JTextField) paints itself based on its status and conflict
-     */
     public void paint() {
         if (isInConflict) {
-            // Highlight cell in red if it is in conflict
-            super.setBackground(BG_CONFLICT);
+            super.setBackground(BG_CONFLICT); // Highlight cell in red
         } else if (status == CellStatus.GIVEN) {
             super.setText(number + "");
             super.setEditable(false);
@@ -76,6 +147,26 @@ public class Cell extends JTextField {
             super.setBackground(BG_WRONG_GUESS);
         }
     }
+    private void handleInput() {
+        try {
+            int inputNumber = Integer.parseInt(getText());
+            SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+            if (mainFrame.isValidInput(row, col, inputNumber)) {
+                if (inputNumber == number) {
+                    status = CellStatus.CORRECT_GUESS;
+                } else {
+                    status = CellStatus.WRONG_GUESS;
+                }
+                paint(); // Update the cell's appearance
+                mainFrame.updateStatusBar(); // Update the status bar
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid input!");
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid number.");
+        }
+    }
+
 
     /**
      * Set whether this cell is in conflict
@@ -84,14 +175,67 @@ public class Cell extends JTextField {
      */
     public void setConflict(boolean conflict) {
         this.isInConflict = conflict;
-        paint(); // Repaint the cell to reflect the conflict status
+        paint(); 
+
+        if (conflict) {
+       
+            new javax.swing.Timer(2000, e -> {
+                this.isInConflict = false; 
+                paint(); 
+            }).start();
+        }
     }
 
-    /**
-     * Get whether this cell is in conflict
-     * 
-     * @return True if the cell is in conflict, false otherwise
-     */
+    @Override
+    protected void paintBorder(java.awt.Graphics g) {
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
+    
+        // Warna untuk grid minor (bukan subgrid 3x3)
+        Color minorGridColor = new Color(239, 239, 239, 255);
+    
+        // Gambar grid minor terlebih dahulu
+        g2.setColor(minorGridColor); 
+        g2.setStroke(new java.awt.BasicStroke(1)); 
+        if (row > 0) { 
+            g2.drawLine(0, 0, getWidth(), 0); 
+        }
+        if (col > 0) { 
+            g2.drawLine(0, 0, 0, getHeight()); 
+        }
+        if (row < 8) { 
+            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1); 
+        }
+        if (col < 8) { 
+            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
+        }
+    
+        // Tentukan apakah ini bagian dari subgrid 3x3
+        boolean isTopBorder = (row % 3 == 0);
+        boolean isLeftBorder = (col % 3 == 0);
+        boolean isBottomBorder = (row == 8);
+        boolean isRightBorder = (col == 8); 
+    
+        // Gambar garis pink untuk subgrid 3x3 di atas grid minor
+        g2.setColor(GRID_LINE_COLOR); 
+        g2.setStroke(new java.awt.BasicStroke(4)); 
+    
+        if (isTopBorder && row > 0) { 
+            g2.drawLine(0, 0, getWidth(), 0); 
+        }
+        if (isLeftBorder && col > 0) { 
+            g2.drawLine(0, 0, 0, getHeight());
+        }
+        if (isBottomBorder && row < 8) {
+            g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
+        }
+        if (isRightBorder && col < 8) { 
+            g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
+        }
+    }
+    
+    
+    
+       
     public boolean isConflict() {
         return isInConflict;
     }

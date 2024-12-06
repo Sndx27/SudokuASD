@@ -2,7 +2,9 @@ package sudoku;
 
 import java.awt.Color;
 import java.awt.Font;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 /**
  * The Cell class models the cells of the Sudoku puzzle, by customizing
@@ -35,6 +37,7 @@ public class Cell extends JTextField {
         this.col = col;
         super.setHorizontalAlignment(JTextField.CENTER);
         super.setFont(FONT_NUMBERS);
+        addActionListener(e -> handleInput());
     }
 
     /**
@@ -69,6 +72,26 @@ public class Cell extends JTextField {
             super.setBackground(BG_WRONG_GUESS);
         }
     }
+    private void handleInput() {
+        try {
+            int inputNumber = Integer.parseInt(getText());
+            SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+            if (mainFrame.isValidInput(row, col, inputNumber)) {
+                if (inputNumber == number) {
+                    status = CellStatus.CORRECT_GUESS;
+                } else {
+                    status = CellStatus.WRONG_GUESS;
+                }
+                paint(); // Update the cell's appearance
+                mainFrame.updateStatusBar(); // Update the status bar
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid input!");
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid number.");
+        }
+    }
+
 
     /**
      * Set whether this cell is in conflict

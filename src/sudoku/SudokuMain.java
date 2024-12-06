@@ -12,17 +12,11 @@ public class SudokuMain extends JFrame {
    private static final long serialVersionUID = 1L;  // to prevent serial warning
 
    // private variables
-    GameBoardPanel board = new GameBoardPanel();
-    JButton btnNewGame = new JButton("New Game");
-    JTextField statusBar = new JTextField("Welcome to Sudoku! by Kelompok 7");
-    JProgressBar progressBar = new JProgressBar(0, SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE);
-    Timer timer;
-    int elapsedTime = 0; // in seconds
-    int score = 0;
-
+   GameBoardPanel board = new GameBoardPanel();
+   JButton btnNewGame = new JButton("New Game");
 
    // Constructor
-   public SudokuMain(String playerName) {
+   public SudokuMain(String playerName, int difficulty) {
       Container cp = getContentPane();
       cp.setLayout(new BorderLayout());
 
@@ -30,43 +24,23 @@ public class SudokuMain extends JFrame {
 
       // Add a button to the south to re-start the game via board.newGame()
       btnNewGame.addActionListener(new ActionListener() {
-         public void actionPerformed(ActionEvent e) {
-            board.newGame();
-            resetGame();
-            updateStatusBar();
-         }
-      }); 
-
-
-      JPanel southPanel = new JPanel(new BorderLayout());
-      southPanel.add(btnNewGame, BorderLayout.NORTH); // button at the top
-      southPanel.add(statusBar, BorderLayout.SOUTH);  // status bar 
-      cp.add(southPanel, BorderLayout.SOUTH);  // Add the south panel to the main container
+    	    public void actionPerformed(ActionEvent e) {
+    	        board.newGame(difficulty);
+    	    }
+    	});
+      cp.add(btnNewGame, BorderLayout.SOUTH);  // Menambahkan tombol ke bagian bawah
 
       // Initialize the game board to start the game
-      board.newGame();
-      setJMenuBar(createMenuBar());
-      updateStatusBar();
-
-      progressBar.setStringPainted(true);
-      cp.add(progressBar, BorderLayout.NORTH);
-      timer = new Timer(1000, new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            elapsedTime++;
-            updateStatusBar();
-        }
-      });
-        timer.start();
-
+      board.newGame(difficulty);
+      setJMenuBar(createMenuBar(difficulty));
 
       pack();     // Pack the UI components, instead of using setSize()
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // to handle window-closing
-      setTitle(playerName+"'s Sudoku");
+      setTitle("Sudoku");
       setVisible(true);
    }
-
    // Method to create the menu bar
-   private JMenuBar createMenuBar() {
+   private JMenuBar createMenuBar(int difficulty) {
       JMenuBar menuBar = new JMenuBar();
 
       // File menu
@@ -76,15 +50,8 @@ public class SudokuMain extends JFrame {
       JMenuItem exitItem = new JMenuItem("Exit");
 
       // Add action listeners for File menu items
-      newGameItem.addActionListener(e -> {
-         board.newGame();
-         resetGame();
-         updateStatusBar(); // Update the status bar
-      });
-      resetGameItem.addActionListener(e -> {
-         resetGame();
-         updateStatusBar(); // Update the status bar
-      });
+      newGameItem.addActionListener(e -> board.newGame(difficulty));
+      resetGameItem.addActionListener(e -> resetGame());
       exitItem.addActionListener(e -> System.exit(0));
 
       fileMenu.add(newGameItem);
@@ -113,75 +80,14 @@ public class SudokuMain extends JFrame {
    }
 
    // Method to reset the game (clears the board but keeps the puzzle)
-    private void resetGame() {
-        elapsedTime = 0; // Reset elapsed time
-        score = 0; // Reset score
-        timer.restart(); // Restart the timer
-        progressBar.setValue(0); // Reset progress bar
-
-        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-                Cell cell = board.cells[row][col];
-                if (cell.status == CellStatus.TO_GUESS || cell.status == CellStatus.WRONG_GUESS) {
-                    cell.newGame(0, false); // Reset the cell
-                }
-            }
-        }
-    }
-
-   // Method to update the status bar with the number of cells remaining
-   public void updateStatusBar() {
-      int remainingCells = 0;
+   private void resetGame() {
       for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-          for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-              Cell cell = board.cells[row][col];
-              if (cell.status == CellStatus.TO_GUESS) {
-                  remainingCells++;
-              }
-          }
+         for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+            Cell cell = board.cells[row][col];
+            if (cell.status == CellStatus.TO_GUESS || cell.status == CellStatus.WRONG_GUESS) {
+               cell.newGame(0, false); // Reset the cell
+            }
+         }
       }
-      statusBar.setText("Cells remaining: " + remainingCells + " | Score: " + score + " | Time: " + elapsedTime + "s");
-      progressBar.setValue(SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE - remainingCells);
-
-  }
-  public boolean isValidInput(int row, int col, int inputNumber) {
-   // Check if the input number is between 1 and 9
-   if (inputNumber < 1 || inputNumber > 9) {
-       return false;
-   }
-
-   // Check the row
-   for (int c = 0; c < SudokuConstants.GRID_SIZE; c++) {
-       if (c != col && board.cells[row][c].number == inputNumber) {
-           return false; // Conflict in the same row
-       }
-   }
-
-   // Check the column
-   for (int r = 0; r < SudokuConstants.GRID_SIZE; r++) {
-       if (r != row && board.cells[r][col].number == inputNumber) {
-           return false; // Conflict in the same column
-       }
-   }
-
-   // Check the 3x3 grid
-   int gridRowStart = (row / 3) * 3;
-   int gridColStart = (col / 3) * 3;
-   for (int r = gridRowStart; r < gridRowStart + 3; r++) {
-       for (int c = gridColStart; c < gridColStart + 3; c++) {
-           if ((r != row || c != col) && board.cells[r][c].number == inputNumber) {
-               return false; // Conflict in the 3x3 grid
-           }
-       }
-   }
-
-   // If the input is valid, increase the score
-   score += 10; // Increment score for a valid input
-   return true; // No conflicts found
-}
-
-   // Main method
-   public static void main(String[] args) {
-      SwingUtilities.invokeLater(() -> new SudokuMain("Player"));
    }
 }

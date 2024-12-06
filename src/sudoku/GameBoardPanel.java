@@ -1,5 +1,6 @@
 package sudoku;
 
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -15,9 +16,9 @@ public class GameBoardPanel extends JPanel {
 
    // Define properties
    /** The game board composes of 9x9 Cells (customized JTextFields) */
-   public Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
+   private Cell[][] cells = new Cell[SudokuConstants.GRID_SIZE][SudokuConstants.GRID_SIZE];
    /** It also contains a Puzzle with array numbers and isGiven */
-   public Puzzle puzzle = new Puzzle();
+   private Puzzle puzzle = new Puzzle();
 
    /** Constructor */
    public GameBoardPanel() {
@@ -52,9 +53,16 @@ public class GameBoardPanel extends JPanel {
     * Generate a new puzzle; and reset the game board of cells based on the puzzle.
     * You can call this method to start a new game.
     */
-   public void newGame() {
+   public void newGame(int difficulty) {
       // Generate a new puzzle
-      puzzle.newPuzzle(2);
+      if(difficulty==1){
+         puzzle.newPuzzle(10);
+      } else if(difficulty==2){
+         puzzle.newPuzzle(25);
+      } else if(difficulty==3){
+         puzzle.newPuzzle(40);
+      }
+      
 
       // Initialize all the 9x9 cells, based on the puzzle.
       for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {

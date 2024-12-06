@@ -31,14 +31,20 @@ public class Puzzle {
    /**
     * Generate a new puzzle given the difficulty level (cellsToGuess).
     */
+   /**
+    * Generate a new puzzle given the difficulty level (cellsToGuess).
+    */
    public void newPuzzle(int cellsToGuess) {
       // Pilih puzzle secara acak
       int randomIndex = random.nextInt(puzzles.length);
       int[][] selectedPuzzle = puzzles[randomIndex];
 
+
+      // Salin puzzle terpilih ke array "numbers"
       // Salin puzzle terpilih ke array "numbers"
       for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
          for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+            numbers[row][col] = selectedPuzzle[row][col];
             numbers[row][col] = selectedPuzzle[row][col];
          }
       }
@@ -62,8 +68,11 @@ public class Puzzle {
       }
 
       // Salin grid ke array "isGiven"
+      // Tentukan sel mana yang perlu ditebak
+      // Salin grid ke array "isGiven"
       for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
          for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+            isGiven[row][col] = grid[row][col];
             isGiven[row][col] = grid[row][col];
          }
       }

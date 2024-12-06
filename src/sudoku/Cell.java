@@ -24,7 +24,7 @@ public class Cell extends JTextField {
     public static final Color BG_GIVEN = Color.WHITE; // Latar belakang angka yang diberikan (Abu-abu terang)
     public static final Color BG_TO_GUESS = Color.WHITE; // Latar belakang untuk angka yang bisa diubah (Putih)
     public static final Color BG_CORRECT_GUESS = new Color(144, 238, 144); // Latar belakang hijau untuk angka benar
-    public static final Color BG_WRONG_GUESS = new Color(255, 182, 193); // Latar belakang merah muda untuk angka salah
+    public static final Color BG_WRONG_GUESS = new Color(144, 238, 144); // Latar belakang merah muda untuk angka salah
     public static final Color BG_CONFLICT = new Color(255, 99, 71); // Highlight merah untuk konflik
     public static final Font FONT_NUMBERS = new Font("SansSerif", Font.BOLD, 24); // Font angka
     public static final Color GRID_LINE_COLOR = new Color(181, 85, 96); // Warna pink kemerahan untuk garis grid

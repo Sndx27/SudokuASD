@@ -13,7 +13,7 @@ public class SudokuMain extends JFrame {
 
    // private variables
         GameBoardPanel board = new GameBoardPanel();
-        JButton btnNewGame = new JButton("New Game");
+        // JButton btnNewGame = new JButton("New Game");
         JTextField statusBar = new JTextField("Welcome to Sudoku! by Kelompok 7");
         JProgressBar progressBar = new JProgressBar(0, SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE);
         Timer timer;
@@ -39,16 +39,16 @@ public class SudokuMain extends JFrame {
         }
 
       // Add a button to the south to re-start the game via board.newGame()
-      btnNewGame.addActionListener(new ActionListener() {
-         public void actionPerformed(ActionEvent e) {
-            board.newGame(difficulty);
-            updateStatusBar();
-         }
-      }); 
+    //   btnNewGame.addActionListener(new ActionListener() {
+    //      public void actionPerformed(ActionEvent e) {
+    //         board.newGame(difficulty);
+    //         updateStatusBar();
+    //      }
+    //   }); 
 
 
       JPanel southPanel = new JPanel(new BorderLayout());
-      southPanel.add(btnNewGame, BorderLayout.NORTH); // button at the top
+      // button at the top
       southPanel.add(statusBar, BorderLayout.SOUTH);  // status bar 
       cp.add(southPanel, BorderLayout.SOUTH);  // Add the south panel to the main container
 
@@ -105,9 +105,13 @@ public class SudokuMain extends JFrame {
       JMenuItem resetGameItem = new JMenuItem("Reset Game");
       JMenuItem exitItem = new JMenuItem("Exit");
 
-      // Add action listeners for File menu items
-      newGameItem.addActionListener(e -> board.newGame(difficulty));
-      resetGameItem.addActionListener(e -> resetGame());
+        // Add action listeners for File menu items
+        newGameItem.addActionListener(e -> board.newGame(difficulty));
+        resetGameItem.addActionListener(e -> {
+        resetGame(); // Memanggil metode resetGame
+        updateStatusBar(); // Memperbarui status bar setelah reset
+        });
+    
       exitItem.addActionListener(e -> System.exit(0));
 
       fileMenu.add(newGameItem);
@@ -135,17 +139,24 @@ public class SudokuMain extends JFrame {
       return menuBar;
    }
 
-   // Method to reset the game (clears the board but keeps the puzzle)
-   private void resetGame() {
-      for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-         for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-            Cell cell = board.cells[row][col];
-            if (cell.status == CellStatus.TO_GUESS || cell.status == CellStatus.WRONG_GUESS) {
-               cell.newGame(0, false); // Reset the cell
-            }
-         }
-      }
-   }
+    private void resetGame() {
+        for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
+            for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+                Cell cell = board.cells[row][col];
+                // Reset only cells that are TO_GUESS or WRONG_GUESS
+                if (cell.status == CellStatus.CORRECT_GUESS || cell.status == CellStatus.WRONG_GUESS || cell.status == CellStatus.TO_GUESS) {
+                    cell.newGame(0, false); // Reset the cell to empty and editable
+                }
+                // If the cell is GIVEN, we do not change its value or status
+                // Ensure the cell's appearance is updated
+                cell.paint(); // Ensure the cell's appearance is updated
+        }
+    }
+    // Reset score and elapsed time
+    score = 0; // Reset score
+    
+    updateStatusBar(); // Update the status bar to reflect changes
+}
 
 // Method to update the status bar with the number of cells remaining
 public void updateStatusBar() {

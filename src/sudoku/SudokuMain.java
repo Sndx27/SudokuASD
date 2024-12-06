@@ -8,8 +8,11 @@ import javax.swing.*;
 /**
  * The main Sudoku program
  */
+
 public class SudokuMain extends JFrame {
-   private static final long serialVersionUID = 1L;  // to prevent serial warning
+    private static final long serialVersionUID = 1L;  // to prevent serial warning
+
+    private MusicPlayer musicPlayer;
 
    // private variables
         GameBoardPanel board = new GameBoardPanel();
@@ -37,6 +40,17 @@ public class SudokuMain extends JFrame {
         } catch (Exception e) {
             System.out.println("Icon not found: " + e.getMessage());
         }
+
+        // Start playing background music
+        musicPlayer = new MusicPlayer();
+        musicPlayer.playMusic("src\\audio\\The Notebooks - Stray Game OST (Original Soundtrack) (1).wav"); // Replace with your file path
+
+        // The rest of your constructor logic...
+        // Setup your game UI, buttons, etc.
+        
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle(playerName + "'s Sudoku");
+        setVisible(true);
 
       // Add a button to the south to re-start the game via board.newGame()
         btnNewGame.addActionListener(new ActionListener() {

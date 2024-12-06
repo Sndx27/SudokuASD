@@ -7,5 +7,4 @@ public enum CellStatus {
 	   WRONG_GUESS    // need to guess - wrong guess
 	      // The puzzle is solved if none of the cells have 
 	      //  status of TO_GUESS or WRONG_GUESS
-, WR
 	}

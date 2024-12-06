@@ -8,11 +8,8 @@ import javax.swing.*;
 /**
  * The main Sudoku program
  */
-
 public class SudokuMain extends JFrame {
-    private static final long serialVersionUID = 1L;  // to prevent serial warning
-
-    private MusicPlayer musicPlayer;
+   private static final long serialVersionUID = 1L;  // to prevent serial warning
 
    // private variables
         GameBoardPanel board = new GameBoardPanel();
@@ -41,22 +38,10 @@ public class SudokuMain extends JFrame {
             System.out.println("Icon not found: " + e.getMessage());
         }
 
-        // Start playing background music
-        musicPlayer = new MusicPlayer();
-        musicPlayer.playMusic("src\\audio\\The Notebooks - Stray Game OST (Original Soundtrack) (1).wav"); // Replace with your file path
-
-        // The rest of your constructor logic...
-        // Setup your game UI, buttons, etc.
-        
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle(playerName + "'s Sudoku");
-        setVisible(true);
-
       // Add a button to the south to re-start the game via board.newGame()
       btnNewGame.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
             board.newGame(difficulty);
-            resetGame();
             updateStatusBar();
          }
       }); 
@@ -162,60 +147,59 @@ public class SudokuMain extends JFrame {
       }
    }
 
-    // Method to update the status bar with the number of cells remaining
-    public void updateStatusBar() {
-    int remainingCells = 0;
-    for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
-        for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
-            Cell cell = board.cells[row][col];
-            if (cell.status == CellStatus.TO_GUESS) {
-                remainingCells++;
-            }
+// Method to update the status bar with the number of cells remaining
+public void updateStatusBar() {
+   int remainingCells = 0;
+   for (int row = 0; row < SudokuConstants.GRID_SIZE; row++) {
+       for (int col = 0; col < SudokuConstants.GRID_SIZE; col++) {
+           Cell cell = board.cells[row][col];
+           if (cell.status == CellStatus.TO_GUESS) {
+               remainingCells++;
+           }
+       }
+   }
+   statusBar.setText("Cells remaining: " + remainingCells + " | Score: " + score + " | Time: " + elapsedTime + "s");
+   progressBar.setValue(SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE - remainingCells);
+
+}
+public boolean isValidInput(int row, int col, int inputNumber) {
+// Check if the input number is between 1 and 9
+if (inputNumber < 1 || inputNumber > 9) {
+    return false;
+}
+
+// Check the row
+for (int c = 0; c < SudokuConstants.GRID_SIZE; c++) {
+    if (c != col && board.cells[row][c].number == inputNumber) {
+        return false; // Conflict in the same row
+    }
+}
+
+// Check the column
+for (int r = 0; r < SudokuConstants.GRID_SIZE; r++) {
+    if (r != row && board.cells[r][col].number == inputNumber) {
+        return false; // Conflict in the same column
+    }
+}
+
+// Check the 3x3 grid
+int gridRowStart = (row / 3) * 3;
+int gridColStart = (col / 3) * 3;
+for (int r = gridRowStart; r < gridRowStart + 3; r++) {
+    for (int c = gridColStart; c < gridColStart + 3; c++) {
+        if ((r != row || c != col) && board.cells[r][c].number == inputNumber) {
+            return false; // Conflict in the 3x3 grid
         }
     }
-    statusBar.setText("Cells remaining: " + remainingCells + " | Score: " + score + " | Time: " + elapsedTime + "s");
-    progressBar.setValue(SudokuConstants.GRID_SIZE * SudokuConstants.GRID_SIZE - remainingCells);
+}
 
-    }
-    public boolean isValidInput(int row, int col, int inputNumber) {
-    // Check if the input number is between 1 and 9
-    if (inputNumber < 1 || inputNumber > 9) {
-        return false;
-    }
+// If the input is valid, increase the score
+score += 10; // Increment score for a valid input
+return true; // No conflicts found
+}
 
-    // Check the row
-    for (int c = 0; c < SudokuConstants.GRID_SIZE; c++) {
-        if (c != col && board.cells[row][c].number == inputNumber) {
-            return false; // Conflict in the same row
-        }
-    }
-
-    // Check the column
-    for (int r = 0; r < SudokuConstants.GRID_SIZE; r++) {
-        if (r != row && board.cells[r][col].number == inputNumber) {
-            return false; // Conflict in the same column
-        }
-    }
-
-    // Check the 3x3 grid
-    int gridRowStart = (row / 3) * 3;
-    int gridColStart = (col / 3) * 3;
-    for (int r = gridRowStart; r < gridRowStart + 3; r++) {
-        for (int c = gridColStart; c < gridColStart + 3; c++) {
-            if ((r != row || c != col) && board.cells[r][c].number == inputNumber) {
-                return false; // Conflict in the 3x3 grid
-            }
-        }
-    }
-
-    // If the input is valid, increase the score
-    score += 10; // Increment score for a valid input
-    return true; // No conflicts found
-    }
 // Main method
-    public static void main(String[] args) {
-        // Simulate passing the name and difficulty from WelcomeScreen
-        SwingUtilities.invokeLater(() -> new SudokuMain("PlayerName", 2)); // Example player name and difficulty
-    }
-
+public static void main(String[] args) {
+   SwingUtilities.invokeLater(() -> new SudokuMain("Player",1));
+}
 }

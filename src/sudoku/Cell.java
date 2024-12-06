@@ -35,7 +35,8 @@ public class Cell extends JTextField {
     int row, col; // The row and column number [0-8] of this cell
     int number; // The puzzle number [1-9] for this cell
     CellStatus status; // The status of this cell defined in enum CellStatus
-    private boolean isInConflict = false; // Whether this cell is in conflict
+    public boolean isInConflict = false; // Whether this cell is in conflict
+    public boolean isGiven;
 
     /** Constructor */
     public Cell(int row, int col) {
@@ -58,7 +59,7 @@ public class Cell extends JTextField {
             getActionMap().put("input" + i, new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    handleInput(number);
+                    handleInput();
                 }
             });
         }
@@ -104,27 +105,25 @@ public class Cell extends JTextField {
         }
     }
 
-    private void handleInput(int inputNumber) {
-        SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
-        if (mainFrame.isValidInput(row, col, inputNumber)) {
-            if (inputNumber == number) {
-                status = CellStatus.CORRECT_GUESS;
-            } else {
-                status = CellStatus.WRONG_GUESS;
-            }
-            paint(); // Update the cell's appearance
-            mainFrame.updateStatusBar(); // Update the status bar
-        } else {
-            JOptionPane.showMessageDialog(this, "Invalid input!");
-        }
-    }
+    
     /**
      * Reset this cell for a new game, given the puzzle number and isGiven
      */
     public void newGame(int number, boolean isGiven) {
-        this.number = number;
-        this.status = isGiven ? CellStatus.GIVEN : CellStatus.TO_GUESS;
+        this.number = number; // Set the number for the cell
+        this.isGiven = isGiven; // Set whether the cell is given or not
         this.isInConflict = false; // Reset conflict status for a new game
+    
+        if (isGiven) {
+            setText(String.valueOf(number)); // Display the number if it's given
+            setEditable(false); // Make the cell non-editable if it's a given number
+            this.status = CellStatus.GIVEN; // Set status to GIVEN
+        } else {
+            setText(""); // Clear the text if it's not a given number
+            setEditable(true); // Make the cell editable if it's not a given number
+            this.status = CellStatus.TO_GUESS; // Set status to TO_GUESS
+        }
+    
         paint(); // Paint the cell based on its initial status
     }
 
@@ -148,22 +147,38 @@ public class Cell extends JTextField {
         }
     }
     private void handleInput() {
+        handleInput(getText());
+    }
+    
+    private void handleInput(String input) {
+        SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
+        int inputNumber;
+    
+        // Try to parse the input if it's not empty
+        if (input.isEmpty()) {
+            return; // Do nothing if the input is empty
+        }
+    
         try {
-            int inputNumber = Integer.parseInt(getText());
-            SudokuMain mainFrame = (SudokuMain) SwingUtilities.getWindowAncestor(this);
-            if (mainFrame.isValidInput(row, col, inputNumber)) {
-                if (inputNumber == number) {
-                    status = CellStatus.CORRECT_GUESS;
-                } else {
-                    status = CellStatus.WRONG_GUESS;
-                }
-                paint(); // Update the cell's appearance
-                mainFrame.updateStatusBar(); // Update the status bar
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid input!");
-            }
+            inputNumber = Integer.parseInt(input);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Please enter a valid number.");
+            setText(""); // Clear the cell's text
+            return; // Exit if the input is not a valid number
+        }
+    
+        // Validate the input number
+        if (mainFrame.isValidInput(row, col, inputNumber)) {
+            if (inputNumber == number) {
+                status = CellStatus.CORRECT_GUESS;
+            } else {
+                status = CellStatus.WRONG_GUESS;
+            }
+            paint(); // Update the cell's appearance
+            mainFrame.updateStatusBar(); // Update the status bar
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid input!");
+            setText(""); // Clear the cell's text
         }
     }
 

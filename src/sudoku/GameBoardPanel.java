@@ -53,81 +53,85 @@ public class GameBoardPanel extends JPanel {
     * Generate a new puzzle; and reset the game board of cells based on the puzzle.
     * You can call this method to start a new game.
     */
-   public void newGame(int difficulty) {
+    public void newGame(int difficulty) {
       // Generate a new puzzle
-      if(difficulty==1){
-         puzzle.newPuzzle(10);
-      } else if(difficulty==2){
-         puzzle.newPuzzle(25);
-      } else if(difficulty==3){
-         puzzle.newPuzzle(40);
+      if (difficulty == 1) {
+          puzzle.newPuzzle(10);
+      } else if (difficulty == 2) {
+          puzzle.newPuzzle(25);
+      } else if (difficulty == 3) {
+          puzzle.newPuzzle(40);
       }
-      
-
+  
       // Initialize all the 9x9 cells, based on the puzzle.
       for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
-         for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-            cells[row][col].newGame(puzzle.numbers[row][col], puzzle.isGiven[row][col]);
-         }
+          for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+              cells[row][col].newGame(puzzle.numbers[row][col], puzzle.isGiven[row][col]);
+          }
       }
-   }
+  
+      // Check if the puzzle is solved after initializing the cells
+      if (isSolved()) {
+          JOptionPane.showMessageDialog(this, "Selamat, Anda berhasil menyelesaikan Sudoku!");
+      }
+  }
 
    /**
     * Return true if the puzzle is solved
     * i.e., none of the cell have status of TO_GUESS or WRONG_GUESS
     */
-   public boolean isSolved() {
+    public boolean isSolved() {
       for (int row = 0; row < SudokuConstants.GRID_SIZE; ++row) {
-         for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
-            if (cells[row][col].status == CellStatus.TO_GUESS || cells[row][col].status == CellStatus.WRONG_GUESS) {
-               return false;
-            }
-         }
+          for (int col = 0; col < SudokuConstants.GRID_SIZE; ++col) {
+              if (cells[row][col].status == CellStatus.TO_GUESS || cells[row][col].status == CellStatus.WRONG_GUESS) {
+                  return false; 
+              }
+          }
       }
-      return true;
+      return true;  
    }
 
    // [TODO 2] Define a Listener Inner Class for all the editable Cells
    private class CellInputListener implements ActionListener {
       @Override
       public void actionPerformed(ActionEvent e) {
-         // Get a reference of the JTextField that triggers this action event
-         Cell sourceCell = (Cell) e.getSource();
-
-         try {
-            // Periksa apakah input adalah angka valid
-            int numberIn = Integer.parseInt(sourceCell.getText().trim());
-
-            // Debugging: cetak input
-            System.out.println("You entered: " + numberIn);
-
-            // Periksa validitas input
-            if (isValidInput(sourceCell.row, sourceCell.col, numberIn)) {
+          // Get a reference of the JTextField that triggers this action event
+          Cell sourceCell = (Cell) e.getSource();
+  
+          try {
+              // Check if the input is a valid number
+              int numberIn = Integer.parseInt(sourceCell.getText().trim());
+  
+              // Debugging: print input
+              System.out.println("You entered: " + numberIn);
+  
+              // Check input validity
+              if (isValidInput(sourceCell.row, sourceCell.col, numberIn)) {
                   if (numberIn == sourceCell.number) {
-                     sourceCell.status = CellStatus.CORRECT_GUESS;
+                      sourceCell.status = CellStatus.CORRECT_GUESS;
                   } else {
-                     sourceCell.status = CellStatus.WRONG_GUESS;
+                      sourceCell.status = CellStatus.WRONG_GUESS;
                   }
-            } else {
+              } else {
                   highlightConflicts(sourceCell.row, sourceCell.col, numberIn);
                   JOptionPane.showMessageDialog(null, "Konflik terdeteksi! Angka sudah ada di baris, kolom, atau sub-grid.");
-            }
-         } catch (NumberFormatException ex) {
-            // Input bukan angka, tampilkan pesan kesalahan
-            JOptionPane.showMessageDialog(null, "Harap masukkan angka valid.");
-            sourceCell.setText(""); // Hapus teks dari sel
-            return; // Jangan lanjutkan jika input tidak valid
-         }
-
-         // Perbarui tampilan sel
-         sourceCell.paint();
-
-         // Periksa apakah puzzle sudah selesai
-         if (isSolved()) {
-            JOptionPane.showMessageDialog(null, "Selamat, Anda berhasil menyelesaikan Sudoku!");
-         }
+              }
+          } catch (NumberFormatException ex) {
+              // Input is not a number, simply clear the text from the cell
+              JOptionPane.showMessageDialog(null, "Harap masukkan angka valid.");
+              sourceCell.setText(""); // Clear text from the cell
+              return; // Do not proceed if input is not valid
+          }
+  
+          // Update the cell's appearance
+          sourceCell.paint();
+  
+          // Check if the puzzle is solved
+          if (isSolved()) {
+              JOptionPane.showMessageDialog(null, "Selamat, Anda berhasil menyelesaikan Sudoku!");
+          }
       }
-   }
+  }
 
   
    private boolean isValidInput(int row, int col, int userInput) {

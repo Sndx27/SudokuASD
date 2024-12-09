@@ -1,3 +1,12 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #7
+ * 1 - 5026231066 - Burju Ferdinand Harianja
+ * 2 - 5026231132 - Clay Amsal Sebastian Hutabarat
+ * 3 - 5026213181 - Sandythia Lova Ramadhani Krisnaprana
+ */
 package sudoku;
 
 import java.awt.Color;
@@ -194,7 +203,7 @@ public class Cell extends JTextField {
 
         if (conflict) {
        
-            new javax.swing.Timer(2000, e -> {
+            new javax.swing.Timer(1500, e -> {
                 this.isInConflict = false; 
                 paint(); 
             }).start();

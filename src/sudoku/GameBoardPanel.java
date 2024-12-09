@@ -1,3 +1,12 @@
+/**
+ * ES234317-Algorithm and Data Structures
+ * Semester Ganjil, 2024/2025
+ * Group Capstone Project
+ * Group #7
+ * 1 - 5026231066 - Burju Ferdinand Harianja
+ * 2 - 5026231132 - Clay Amsal Sebastian Hutabarat
+ * 3 - 5026213181 - Sandythia Lova Ramadhani Krisnaprana
+ */
 package sudoku;
 
 
@@ -7,6 +16,7 @@ import javax.swing.*;
 
 public class GameBoardPanel extends JPanel {
    private static final long serialVersionUID = 1L;  // to prevent serial warning
+   
 
    // Define named constants for UI sizes
    public static final int CELL_SIZE = 60;   // Cell width/height in pixels
@@ -70,10 +80,6 @@ public class GameBoardPanel extends JPanel {
           }
       }
   
-      // Check if the puzzle is solved after initializing the cells
-      if (isSolved()) {
-          JOptionPane.showMessageDialog(this, "Selamat, Anda berhasil menyelesaikan Sudoku!");
-      }
   }
 
    /**
@@ -88,6 +94,7 @@ public class GameBoardPanel extends JPanel {
               }
           }
       }
+      // timer.stop();
       return true;  
    }
 
